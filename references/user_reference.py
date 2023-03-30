@@ -1,8 +1,8 @@
-from models.user_model import UserModel
 from typing import Optional
+from pydantic import BaseModel
 
 
-class UserUpdateSchema(UserModel):
+class UserUpdateSchema(BaseModel):
     fullname: Optional[str]
     email: Optional[str]
     password: Optional[str]

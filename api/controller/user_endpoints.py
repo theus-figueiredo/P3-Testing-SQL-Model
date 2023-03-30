@@ -55,27 +55,26 @@ async def get_by_id(id: int, db: AsyncSession = Depends(get_session)) -> Respons
 
 
 #UPDATE
-@user_router.patch('/{id}', status_code=status.HTTP_200_OK, response_model=UserModel)
+@user_router.patch('/{id}', status_code=status.HTTP_200_OK)
 async def update_user(id: int, data: UserUpdateSchema, db: AsyncSession = Depends(get_session)) -> Response:
     
     async with db as session:
         query_result = await session.execute(select(UserModel).filter(UserModel.id == id))
-        user = query_result.scalar()
+        user_to_update = query_result.scalar()
         
-        if query_result is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuário não encontrado')
-        else:
-            
+        if query_result:
             for key, value in data.dict(exclude_unset=True).items():
-                setattr(user, key, value)
+                setattr(user_to_update, key, value)
             
-            await db.commit()
-            return user
+            await session.commit()
+            return user_to_update
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuário não encontrado')
 
 
 #DELETE
-@user_router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT, response_model=UserModel)
-async def delete_user(id: int, db: AsyncSession = Depends(get_session)):
+@user_router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(id: int, db: AsyncSession = Depends(get_session)) -> None:
     
     async with db as session:
         query_result = await session.execute(select(UserModel).filter(UserModel.id == id))
@@ -84,6 +83,6 @@ async def delete_user(id: int, db: AsyncSession = Depends(get_session)):
         if query_result is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuário não encontrado')
         else:
-            await db.delete(user_to_delete)
-            await db.commit()
+            await session.delete(user_to_delete)
+            await session.commit()
 
