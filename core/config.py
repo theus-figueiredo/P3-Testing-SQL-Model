@@ -11,8 +11,6 @@ db_user = getenv('DB_USER')
 db_password = getenv('DB_PASSWORD')
 
 
-print(f'{host} {db_name}')
-
 class Settings(BaseConfig):
     
     API_V1_STR: str = '/api/v1'
